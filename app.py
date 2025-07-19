@@ -1,10 +1,10 @@
 from flask import Flask, jsonify
 import psycopg2
 import os
-from flask_cors import CORS # تم استيراد Flask-CORS
+from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app) # تم تمكين CORS لجميع المسارات في التطبيق
+CORS(app)
 
 # تعريف دالة الاتصال بقاعدة البيانات
 def get_db_connection():
@@ -16,6 +16,30 @@ def get_db_connection():
         port=os.environ.get("DB_PORT")
     )
     return conn
+
+# دالة لإنشاء جدول fatwas_binbaz
+def create_fatwas_table():
+    conn = None
+    cur = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS fatwas_binbaz (
+                id SERIAL PRIMARY KEY,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL
+            );
+        """)
+        conn.commit() # تأكيد التغييرات في قاعدة البيانات
+        print("Table 'fatwas_binbaz' created successfully or already exists.")
+    except Exception as e:
+        print(f"Error creating table: {e}")
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 # المسار الرئيسي
 @app.route('/')
@@ -34,8 +58,8 @@ def test_db_connection():
         conn.close()
         return jsonify({"message": "Database connection successful!", "db_version": db_version})
     except Exception as e:
-        # إذا فشل الاتصال، أرجع رسالة خطأ
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
+    create_fatwas_table() # استدعاء الدالة لإنشاء الجدول
     app.run(debug=True)
