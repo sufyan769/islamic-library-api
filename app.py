@@ -93,5 +93,4 @@ def get_single_fatwa(fatwa_id):
             conn.close()
 
 if __name__ == '__main__':
-    # لا توجد دالة create_fatwas_table() هنا بعد الآن
     app.run(debug=True)
